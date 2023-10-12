@@ -1,110 +1,102 @@
+/**
+ * Author: Declan Onunkwo
+ * Date: 12-oct-2023
+ *
+ * Description: A program that generates 200 wikipedia links.
+ */
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import javax.json.*;
+import javax.json.stream.JsonGenerator;
 import java.io.*;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Random;
 
 public class WikipediaLinkGenerator {
     public static void main(String[] args) throws IOException {
 
-        String wikiLink = "https://en.wikipedia.org/wiki/";
+        System.out.println("\nStarting Links Generator...");
 
-        JsonArray links = readFile().getJsonArray("Links");
-        JsonArrayBuilder arrayBuilder = Json.createArrayBuilder(links);
+        HashSet<String> generatedLinks = generateRandomLinks();
+        JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
 
-        int watchDog = 0;
-
-        while(links.size() < 200){
-            String newLink = (wikiLink + generateRandomString()).replaceAll(" ","_");
-            JsonValue newLinkAsValue = Json.createValue(newLink);
-            if(!links.contains(newLinkAsValue)){
-                URL url = new URL(newLink);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("HEAD"); // Use HEAD request to check for the existence of the resource
-                int responseCode = connection.getResponseCode();
-
-                if (responseCode == HttpURLConnection.HTTP_OK) {
-                    arrayBuilder.add(newLink);
-                    links = arrayBuilder.build();
-                }
-            }
-            watchDog += 1;
-            if (watchDog == 2000) break;
+        for(String s : generatedLinks){
+            jsonArrayBuilder.add(s);
         }
 
-        writeJsonFile(links);
+        JsonArray linksArray = jsonArrayBuilder.build();
 
+        writeJsonFile(linksArray);
     }
 
-    private static void writeJsonFile(JsonArray links) {
-        // GET json file location
+    private static void writeJsonFile(JsonArray linksArray) {
+
+        // Create a new Json File (change path to match yours if you are borrowing this code)
         String filePath = "/Users/declan/IdeaProjects/Wikipedia-Page-Similarity-II/src/";
-        File inputFile = new File(filePath + "MyLinks.json");
-        inputFile.delete();
         File outputFile = new File(filePath + "MyLinks.json");
 
-        // READ json file
         OutputStream outputStream = null;
         try{
             outputStream = new FileOutputStream(outputFile);
         }catch (FileNotFoundException e){
             e.printStackTrace();
         }
-        JsonObjectBuilder obj = Json.createObjectBuilder();
-        obj.add("Links",links);
+        Json.createWriter(outputStream);
+        JsonWriter writer;
+
+        // create a configuration to allow pretty_printing (a nice and organized output file)
+        Map<String,Boolean> config = new HashMap<>();
+        config.put(JsonGenerator.PRETTY_PRINTING, true);
+        JsonWriterFactory wFactory = Json.createWriterFactory(config);
+
+        // write linksArray in our outputFile
+        writer = wFactory.createWriter(outputStream);
+        writer.writeArray(linksArray);
+        writer.close();
+        System.out.println("Links Generated in a 'MyLinks.json' file. Happy Coding! :)");
     }
 
-    private static JsonObject readFile() throws IOException {
+    private static HashSet<String> generateRandomLinks() throws IOException {
 
-        // GET json file location
-        String filePath = "/Users/declan/IdeaProjects/Wikipedia-Page-Similarity-II/src/MyLinks.json";
-        File inputFile = new File(filePath);
+        System.out.println("one second...\n");
 
-        // READ json file
-        InputStream inputStream = null;
-        try{
-            inputStream = new FileInputStream(inputFile);
-        }catch (FileNotFoundException e){
-            e.printStackTrace();
-        }
-        JsonReader reader = Json.createReader(inputStream);
-        JsonObject object = reader.readObject();
-        inputStream.close();
-        reader.close();
+        // get the wikipedia link or the source of our collection of links
+        String sourceUrl = "https://en.wikipedia.org/wiki/User:The_Anome/The_three_thousand";
 
-        return object;
-    }
-
-    private static char generateRandomLetter(){
-        Random random = new Random();
-
-        // from letter 'a', get a letter 0 to 25 spots from 'a'. That is, random a-z
-        char letter = (char) ('a' + random.nextInt(26));
-        return letter;
-    }
-
-    private static String generateRandomString() throws IOException {
-        // go to a section or letter in the dictionary
-        String sourceUrl = "https://en.wikipedia.org/wiki/Wikipedia:Vital_articles/Level/5";
-
-        // get the list of words container
+        // get the list of a[href]
         Document doc = Jsoup.connect(sourceUrl).get();
-        Elements liElements = doc.select("ul li");
+        Elements liHref = doc.select(".mw-parser-output  p a[href]");
 
-        // randomly select a word based on the random index
-        int sizeOfList = liElements.size();
+        // randomly select one of the a[href] using a random index
+        int sizeOfList = liHref.size();
         Random random = new Random();
-        int randomIndex = random.nextInt(sizeOfList);
-        Element randomLiElement = liElements.get(randomIndex);
 
-        String randomString = randomLiElement.text();
+        // initialize a hashset to store link--helps avoid repeats and a watchdog to exit long loop.
+        HashSet<String> links = new HashSet<>();
+        int watchDog = 0;
 
-        return randomString;
+        while(links.size() < 200){
+            // this is to make the bound 1 to sizeOfList. The 0th link was sourceURL :(
+            int randomIndex = random.nextInt(sizeOfList - 1) + 1;
+
+            // concatenate the href link we got with randomLink to get a full wiki link
+            String randomLink = "https://en.wikipedia.org" + liHref.get(randomIndex).attr("href");
+
+            links.add(randomLink);
+            watchDog += 1;
+
+            if(watchDog > 400){
+                System.out.println("Unable to generate links--loops went above limit. Please Try again");
+                System.exit(0);
+            }
+        }
+
+        return links;
     }
 }
