@@ -4,7 +4,7 @@ import java.util.Properties;
 
 public class Organizer {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
 
         // Properties
         Properties properties = new Properties();
@@ -32,6 +32,24 @@ public class Organizer {
         inputStream.close();
         reader.close();
 
+        createPersistentFiles(jArray);
+    }
 
+    private static void createPersistentFiles(JsonArray arrayOfLinks) throws Exception {
+        WebScraper scraper = new WebScraper();
+        CustomHashTable ht = new CustomHashTable();
+
+        for(int i=0; i<arrayOfLinks.size(); i++){
+            String url = arrayOfLinks.getString(i);
+
+            for(String s : scraper.webScrape(url)){
+                ht.add(s);
+            }
+
+            String fileName = url.substring(31);
+            FileOutputStream fileOutputStream = new FileOutputStream(fileName);
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+            ht.writeObject(objectOutputStream);
+        }
     }
 }
