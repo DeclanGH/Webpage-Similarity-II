@@ -7,6 +7,7 @@ class CustomHashTable implements java.io.Serializable {
         Node next;
         int wordCount = 1;
         Object value;
+        int tfidf;
 
         Node(Object k, Node n) {
             key = k;
@@ -28,17 +29,19 @@ class CustomHashTable implements java.io.Serializable {
         return false;
     }
 
-    void add(Object key) {
+    void add(Object key, Object value) {
         int h = key.hashCode();
         int i = h & (table.length - 1);
         for (Node e = table[i]; e != null; e = e.next) {
             if (key.equals(e.key)){
+                e.value = value;
                 documentSize += 1;
                 e.wordCount += 1;
                 return;
             }
         }
         table[i] = new Node(key, table[i]);
+        table[i].value = value;
         ++size;
         if ((float)size/table.length >= 0.75f)
             resize();
@@ -54,33 +57,28 @@ class CustomHashTable implements java.io.Serializable {
                 int h = e.key.hashCode();
                 int j = h & (newTable.length - 1);
                 newTable[j] = new Node(e.key, newTable[j]);
+                newTable[j].value = e.value;
                 newTable[j].wordCount = e.wordCount;
             }
         }
         table = newTable;
     }
 
-    void remove(Object key) {
-        int h = key.hashCode();
+    void setTfidf(String s, boolean tfidf) {
+        int h = s.hashCode();
         int i = h & (table.length - 1);
-        Node e = table[i], p = null;
-        while (e != null) {
-            if (key.equals(e.key)) {
-                if (p == null)
-                    table[i] = e.next;
-                else
-                    p.next = e.next;
-                break;
+        for (Node e = table[i]; e != null; e = e.next) {
+            if (s.equals(e.key)){
+
+                return;
             }
-            p = e;
-            e = e.next;
         }
     }
 
     void printAll() {
         for (int i = 0; i < table.length; ++i)
             for (Node e = table[i]; e != null; e = e.next)
-                System.out.println(e.key + " " + e.wordCount);
+                System.out.println(e.key + " " + e.value);
     }
 
     void writeObject(ObjectOutputStream s) throws Exception {
@@ -99,7 +97,7 @@ class CustomHashTable implements java.io.Serializable {
         //s.defaultReadObject();
         int n = s.readInt();
         for (int i = 0; i < n; ++i){
-            add(s.readObject());
+            add(s.readObject(),3);
         }
 
     }

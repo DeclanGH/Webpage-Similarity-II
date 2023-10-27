@@ -5,8 +5,18 @@ import java.util.Properties;
 public class Organizer {
 
     public static void main(String[] args) throws Exception {
+        CustomHashTable ht = new CustomHashTable();
+        ht.add("man", "declan");
+        ht.add("woman", "grace");
+        ht.add("dog", "bruno");
+        ht.add("color", "red");
+        ht.add("season", "christmas");
+        ht.add("gpa", "3.7");
+        ht.add("country", "usa");
+        ht.add("color", "purple");
+        ht.printAll();
 
-        // Properties
+       /* // Properties
         Properties properties = new Properties();
         FileInputStream fis = null;
         try{
@@ -32,23 +42,26 @@ public class Organizer {
         inputStream.close();
         reader.close();
 
-        createPersistentFiles(jArray);
+        createPersistentFiles(jArray);*/
     }
 
     private static void createPersistentFiles(JsonArray arrayOfLinks) throws Exception {
         WebScraper scraper = new WebScraper();
         CustomHashTable ht = new CustomHashTable();
 
+        CustomHashTable dictionary;
+
         for(int i=0; i<arrayOfLinks.size(); i++){
             String url = arrayOfLinks.getString(i);
 
             for(String s : scraper.webScrape(url)){
-                ht.add(s);
+                ht.add(s,12);
             }
 
-            String fileName = url.substring(31);
-            FileOutputStream fileOutputStream = new FileOutputStream(fileName);
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+            String filePath = "/Users/declan/IdeaProjects/Wikipedia-Page-Similarity-II/src/records/" + url.substring(30);
+            File records = new File(filePath);
+            FileOutputStream fos = new FileOutputStream(filePath);
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fos);
             ht.writeObject(objectOutputStream);
         }
     }
