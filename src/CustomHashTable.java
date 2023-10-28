@@ -6,9 +6,11 @@ class CustomHashTable implements java.io.Serializable {
         Object key;
         Node next;
         int wordCount = 1;
-        Object value;
-        int idf = 0;
-        double tfidf;
+        int documentCount = 0;
+        double tf = 0;
+        int idfCount = 0; // the number of documents a term can be found
+        double idf = 0;
+        double tfidf = tf * idf;
 
         Node(Object k, Node n) {
             key = k;
@@ -18,7 +20,6 @@ class CustomHashTable implements java.io.Serializable {
 
     Node[] table = new Node[8]; // always a power of 2
     int size = 0; // size of a document without repeating objects
-    int documentSize = 0; // size of a document with repeating objects
 
     boolean contains(Object key) {
         int hashCode = key.hashCode();
@@ -30,73 +31,59 @@ class CustomHashTable implements java.io.Serializable {
         return false;
     }
 
+    // normal add method for normal HashTable. (Might not be used in this project)
     void add(Object key) {
         int h = key.hashCode();
         int i = h & (table.length - 1);
         for (Node e = table[i]; e != null; e = e.next) {
             if (key.equals(e.key)){
-                documentSize += 1;
                 e.wordCount += 1;
                 return;
             }
         }
         table[i] = new Node(key, table[i]);
+        table[i].wordCount += 1;
         ++size;
         if ((float)size/table.length >= 0.75f)
             resize();
     }
 
-    void add(Object key, Object value) {
+    // for a single document. Advanced add lets you calculate tf dynamically, and insert idf.
+    void advancedAdd(Object key, int totalWordsInDocument, double idf) {
         int h = key.hashCode();
         int i = h & (table.length - 1);
         for (Node e = table[i]; e != null; e = e.next) {
             if (key.equals(e.key)){
-                e.value = value;
-                documentSize += 1;
                 e.wordCount += 1;
+                e.tf = (double) e.wordCount / totalWordsInDocument;
+                e.idf = idf;
                 return;
             }
         }
         table[i] = new Node(key, table[i]);
-        table[i].value = value;
+        table[i].tf = (double) table[i].wordCount / totalWordsInDocument;
+        table[i].idf = idf;
         ++size;
         if ((float)size/table.length >= 0.75f)
             resize();
     }
 
-    void addTfidf(Object key, double tfidf) {
+    // only use this for dictionary. Where 'dictionary' is Hashtable containing words in all urls
+    void countForIdf(Object key, int documentIndex) {
         int h = key.hashCode();
         int i = h & (table.length - 1);
         for (Node e = table[i]; e != null; e = e.next) {
-            if (key.equals(e.key)){
-                e.tfidf = tfidf;
-                documentSize += 1;
-                e.wordCount += 1;
-                return;
-            }
-        }
-        table[i] = new Node(key, table[i]);
-        table[i].tfidf = tfidf;
-        ++size;
-        if ((float)size/table.length >= 0.75f)
-            resize();
-    }
-
-    void countForIdf(Object key, int documentCount) {
-        int h = key.hashCode();
-        int i = h & (table.length - 1);
-        for (Node e = table[i]; e != null; e = e.next) {
-            if (key.equals(e.key) && !((int)e.value == documentCount)){
-                e.value = documentCount;
-                e.idf += 1;
+            if (key.equals(e.key) && !(e.documentCount == documentIndex)){
+                e.documentCount = documentIndex;
+                e.idfCount += 1;
                 return;
             } else if(key.equals(e.key)){
                 return;
             }
         }
         table[i] = new Node(key, table[i]);
-        table[i].value = documentCount;
-        table[i].idf += 1;
+        table[i].documentCount = documentIndex;
+        table[i].idfCount += 1;
         ++size;
         if ((float)size/table.length >= 0.75f)
             resize();
@@ -113,7 +100,9 @@ class CustomHashTable implements java.io.Serializable {
                 int j = h & (newTable.length - 1);
                 newTable[j] = new Node(e.key, newTable[j]);
                 newTable[j].wordCount = e.wordCount;
-                newTable[j].value = e.value;
+                newTable[j].documentCount = e.documentCount;
+                newTable[j].tf = e.tf;
+                newTable[j].idfCount = e.idfCount;
                 newTable[j].idf = e.idf;
                 newTable[j].tfidf = e.tfidf;
             }
@@ -124,7 +113,7 @@ class CustomHashTable implements java.io.Serializable {
     void printAll() {
         for (int i = 0; i < table.length; ++i)
             for (Node e = table[i]; e != null; e = e.next)
-                System.out.println(e.key + " -> " + e.idf);
+                System.out.println(e.key + " -> " + e.idfCount);
     }
 
     void writeObject(ObjectOutputStream s) throws Exception {
@@ -134,7 +123,7 @@ class CustomHashTable implements java.io.Serializable {
             for (Node e = table[i]; e != null; e = e.next) {
                 s.writeObject(e.key);
                 s.writeObject(e.wordCount);
-                s.writeObject((double) e.wordCount /documentSize);
+                s.writeObject(e.wordCount);
             }
         }
     }
@@ -143,9 +132,8 @@ class CustomHashTable implements java.io.Serializable {
         //s.defaultReadObject();
         int n = s.readInt();
         for (int i = 0; i < n; ++i){
-            add(s.readObject(),3);
+            //add(s.readObject(),3);
         }
 
     }
 }
-
