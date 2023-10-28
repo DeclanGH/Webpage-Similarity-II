@@ -3,7 +3,7 @@ import java.util.Map;
 
 public class ExtendibleHashing {
     private int globalDepth;
-    private Map<Integer, Map<String, String>> directory;
+    private Map<Integer, Map<String, byte[]>> directory;
 
     public ExtendibleHashing() {
         this.globalDepth = 1;
@@ -11,12 +11,12 @@ public class ExtendibleHashing {
         directory.put(0, new HashMap<>());
     }
 
-    public void insert(String key, String value) {
+    public void insert(String key, byte[] serializedObject) {
         int hashCode = key.hashCode();
         int localDepth = Integer.toBinaryString(hashCode).length();
         int index = hashCode & ((1 << globalDepth) - 1);
 
-        Map<String, String> bucket = directory.get(index);
+        Map<String, byte[]> bucket = directory.get(index);
 
         if (bucket.size() >= 2) {
             if (localDepth == globalDepth) {
@@ -29,7 +29,7 @@ public class ExtendibleHashing {
             }
 
             // Rule: if bucket overflow, and localDepth does not equal globalDepth, split the bucket
-            Map<String, String> newBucket = new HashMap<>();
+            Map<String, byte[]> newBucket = new HashMap<>();
             for (String k : bucket.keySet()) {
                 int newBucketIndex = k.hashCode() & ((1 << globalDepth) - 1);
                 if (newBucketIndex != index) {
@@ -43,13 +43,13 @@ public class ExtendibleHashing {
         }
 
         // Rule: Normal insertion if no overflow
-        bucket.put(key, value);
+        bucket.put(key, serializedObject);
     }
 
-    public String find(String key) {
+    public byte[] find(String key) {
         int hashCode = key.hashCode();
         int index = hashCode & ((1 << globalDepth) - 1);
-        Map<String, String> bucket = directory.get(index);
+        Map<String, byte[]> bucket = directory.get(index);
 
         return bucket.get(key);
     }
