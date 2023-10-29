@@ -63,29 +63,26 @@ public class Organizer {
         doc2.printAll();
         doc3.printAll();
 
-        FileOutputStream fos = new FileOutputStream("doc1");
-        ObjectOutputStream oos = new ObjectOutputStream(fos);
+        ExtendibleHashing test = new ExtendibleHashing();
+
+        ByteArrayOutputStream bos1 = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(bos1);
         oos.writeObject(doc1);
-        FileOutputStream fos2 = new FileOutputStream("doc2");
-        ObjectOutputStream oos2 = new ObjectOutputStream(fos2);
+        test.insert("doc1",bos1.toByteArray());
+        ByteArrayOutputStream bos2 = new ByteArrayOutputStream();
+        ObjectOutputStream oos2 = new ObjectOutputStream(bos2);
         oos2.writeObject(doc2);
-        FileOutputStream fos3 = new FileOutputStream("doc3");
-        ObjectOutputStream oos3 = new ObjectOutputStream(fos3);
+        test.insert("doc2",bos2.toByteArray());
+        ByteArrayOutputStream bos3 = new ByteArrayOutputStream();
+        ObjectOutputStream oos3 = new ObjectOutputStream(bos3);
         oos3.writeObject(doc3);
+        test.insert("doc3",bos3.toByteArray());
 
-        FileInputStream fis = new FileInputStream("doc1");
-        ObjectInputStream ois = new ObjectInputStream(fis);
-        CustomHashTable stream1 = (CustomHashTable) ois.readObject();
-        FileInputStream fis2 = new FileInputStream("doc2");
-        ObjectInputStream ois2 = new ObjectInputStream(fis2);
+        ByteArrayInputStream bis2 = new ByteArrayInputStream(test.find("doc2"));
+        ObjectInputStream ois2 = new ObjectInputStream(bis2);
         CustomHashTable stream2 = (CustomHashTable) ois2.readObject();
-        FileInputStream fis3 = new FileInputStream("doc3");
-        ObjectInputStream ois3 = new ObjectInputStream(fis3);
-        CustomHashTable stream3 = (CustomHashTable) ois3.readObject();
 
-        stream1.printAll();
         stream2.printAll();
-        stream3.printAll();
 
 
 
