@@ -78,11 +78,21 @@ public class Organizer {
         oos3.writeObject(doc3);
         test.insert("doc3",bos3.toByteArray());
 
-        ByteArrayInputStream bis2 = new ByteArrayInputStream(test.find("doc2"));
+        FileOutputStream fos = new FileOutputStream("serializedExtensibleHT");
+        ObjectOutputStream outer = new ObjectOutputStream(fos);
+        outer.writeObject(test);
+
+        FileInputStream fis = new FileInputStream("serializedExtensibleHT");
+        ObjectInputStream inner = new ObjectInputStream(fis);
+        ExtendibleHashing test2 = (ExtendibleHashing) inner.readObject();
+
+        ByteArrayInputStream bis2 = new ByteArrayInputStream(test2.find("doc2"));
         ObjectInputStream ois2 = new ObjectInputStream(bis2);
         CustomHashTable stream2 = (CustomHashTable) ois2.readObject();
 
         stream2.printAll();
+
+        System.out.println(stream2.getTfidf("head"));
 
 
 
