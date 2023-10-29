@@ -1,3 +1,10 @@
+/**
+ * Author: Declan Onunkwo
+ * Date: 29-oct-2023
+ *
+ * Description: Maps a string (URL in our case) to a byte array (which is a persistent object)
+ */
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;

@@ -1,3 +1,10 @@
+/**
+ * Author: Declan Onunkwo
+ * Date: 29-oct-2023
+ *
+ * Description: Custom HashTable constructed towards making an efficient tfidf calculator.
+ */
+
 import java.io.*;
 
 class CustomHashTable implements java.io.Serializable {

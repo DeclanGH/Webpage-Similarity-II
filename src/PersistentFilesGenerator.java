@@ -1,3 +1,15 @@
+/**
+ * Author: Declan Onunkwo
+ * Date: 29-oct-2023
+ *
+ * Description: Generates all necessary persistent files required for a faster similarity
+ *              calculation.
+ *              Step 1: Make a persistent Byte Array for a URL's HashTable object
+ *              Step 2: Map the URL to its Byte Array using Extendible Hashing (class provided)
+ *              Step 3: Repeat Step 1 and 2 for every URL in the array of links/URLs
+ *              Step 4: Create a persistent file for the ExtendibleHashing Object.
+ */
+
 import javax.json.*;
 import java.io.*;
 import java.util.Properties;
