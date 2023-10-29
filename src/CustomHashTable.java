@@ -100,6 +100,16 @@ class CustomHashTable implements java.io.Serializable {
         return 0;
     }
 
+    double getTfidf(String key){
+        int hashCode = key.hashCode();
+        int index = hashCode & (table.length - 1);
+        for (Node e = table[index]; e != null; e = e.next) {
+            if (key.equals(e.key))
+                return e.tfidf;
+        }
+        return 0;
+    }
+
     void resize() {
         Node[] oldTable = table;
         int oldCapacity = oldTable.length;
@@ -130,24 +140,4 @@ class CustomHashTable implements java.io.Serializable {
         System.out.println("-----------------------------------------------------------------");
     }
 
-    /*void writeObject(ObjectOutputStream s) throws Exception {
-        //s.defaultWriteObject();
-        s.writeInt(size);
-        for (int i = 0; i < table.length; ++i) {
-            for (Node e = table[i]; e != null; e = e.next) {
-                s.writeObject(e.key);
-                s.writeObject(e.wordCount);
-                s.writeObject(e.wordCount);
-            }
-        }
-    }
-
-     void readObject(ObjectInputStream s) throws Exception {
-        //s.defaultReadObject();
-        int n = s.readInt();
-        for (int i = 0; i < n; ++i){
-            //add(s.readObject(),3);
-        }
-
-    }*/
 }
