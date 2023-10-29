@@ -134,10 +134,11 @@ class CustomHashTable implements java.io.Serializable {
     void printAll() {
         for (int i = 0; i < table.length; ++i) {
             for (Node e = table[i]; e != null; e = e.next) {
-                System.out.println(e.key + " -> " + e.tf + " -> " + e.idf + " -> " + e.tfidf);
+                System.out.println("( Key: "+e.key + " ) ( Term Frequency: " + e.tf + " ) ( Idf: " +
+                        e.idf + " ) ( Tfidf: " + e.tfidf + " )");
             }
         }
-        System.out.println("-----------------------------------------------------------------");
+        System.out.println("-----------------------------------------------------------------------------------------------------------------");
     }
 
 }
