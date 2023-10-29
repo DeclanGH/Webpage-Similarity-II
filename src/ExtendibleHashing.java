@@ -1,7 +1,8 @@
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ExtendibleHashing {
+public class ExtendibleHashing implements Serializable {
     private int globalDepth;
     private Map<Integer, Map<String, byte[]>> directory;
 
