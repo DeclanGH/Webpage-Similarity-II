@@ -18,6 +18,11 @@ public class ExtendibleHashing {
 
         Map<String, byte[]> bucket = directory.get(index);
 
+        if (bucket == null) {
+            bucket = new HashMap<>();
+            directory.put(index, bucket);
+        }
+
         if (bucket.size() >= 2) {
             if (localDepth == globalDepth) {
                 // Rule: if bucket overflow, and localDepth equals globalDepth, Double size
