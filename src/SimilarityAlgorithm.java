@@ -132,35 +132,7 @@ public class SimilarityAlgorithm {
         outputLink2.setText(arrayOfLinks.getString(indexOfMaxSimilarity2));
     }
 
-    private static double doCosineSimilarity(Object @NotNull [] a, String[] b){
-        // Where 'a' represents elements from the link the user provided, and
-        // 'b' represents elements from each link in my array of links.
+    private static double doCosineSimilarity(Object [] a, String[] b){
 
-        // Declaring variables necessary for the math (cosine similarity)
-        double similarity;
-        int numerator = 0;
-        int denominatorA = 0;
-        int denominatorB;
-
-        CustomHashTable ht = new CustomHashTable();
-        for(Object obj : b){
-            ht.add(obj);
-        }
-
-        // The number of similar elements in 'a' and 'b' form the numerator
-        for(int i=0; i<a.length; i++){
-            Object o = a[i];
-            if(ht.contains(o)) numerator += 1;
-            denominatorA += 1; // to avoid counting null elements
-            if(a[i+1] == null) break;
-        }
-
-        // The number of elements in each (a and b) form data to calculate the denominator
-        denominatorB = ht.getSize();
-
-        // Works the same way as the original cosine similarity formula
-        similarity = numerator/(Math.sqrt(denominatorA)*Math.sqrt(denominatorB));
-
-        return similarity;
     }
 }

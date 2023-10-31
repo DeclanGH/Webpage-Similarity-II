@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.ArrayList;
 
+import HashClasses.*;
 public class Tests {
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
