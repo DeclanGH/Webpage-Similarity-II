@@ -151,4 +151,18 @@ public class CustomHashTable implements java.io.Serializable {
         System.out.println("-----------------------------------------------------------------------------------------------------------------");
     }
 
+    public String[] toKeyList(){
+        String[] keyList = new String[size];
+        int index = 0;
+
+        for (int i = 0; i < table.length; ++i) {
+            for (Node e = table[i]; e != null; e = e.next) {
+                keyList[index] = (String) e.key;
+                index += 1;
+            }
+        }
+
+        return keyList;
+    }
+
 }
