@@ -63,13 +63,14 @@ class CustomHashTable implements java.io.Serializable {
             if (key.equals(e.key)){
                 e.wordCount += 1;
                 e.tf = (double) e.wordCount / totalWordsInDocument; // dynamic calculation of tf
+                e.idf = Math.log(idf);
                 e.tfidf = e.tf * e.idf;
                 return;
             }
         }
         table[i] = new Node(key, table[i]);
         table[i].tf = (double) table[i].wordCount / totalWordsInDocument;
-        table[i].idf = Math.log(idf); // only needs to be set once. It constant per word
+        table[i].idf = Math.log(idf);
         table[i].tfidf = table[i].tf * table[i].idf;
         ++size;
         if ((float)size/table.length >= 0.75f)
