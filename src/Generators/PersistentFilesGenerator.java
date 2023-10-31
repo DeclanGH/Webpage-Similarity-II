@@ -82,10 +82,15 @@ public class PersistentFilesGenerator {
             urlMapToFile.insert(url,bos.toByteArray());
         }
 
-        // Serialize the Extendible Hashing class to be used by other classes
+        // Serialize the ExtendibleHashing Object to be used by other classes
         FileOutputStream fos = new FileOutputStream("SerializedExtensibleHashingClass");
         ObjectOutputStream oos = new ObjectOutputStream(fos);
         oos.writeObject(urlMapToFile);
+
+        // Serialize the Dictionary Object to be used by other classes
+        FileOutputStream fos1 = new FileOutputStream("SerializedDictionary");
+        ObjectOutputStream oos1 = new ObjectOutputStream(fos1);
+        oos1.writeObject(dictionary);
 
     }
 }
