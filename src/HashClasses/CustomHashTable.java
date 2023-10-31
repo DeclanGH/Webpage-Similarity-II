@@ -100,6 +100,17 @@ public class CustomHashTable implements java.io.Serializable {
             resize();
     }
 
+    public void setIdf(String key, double idf){
+        int hashCode = key.hashCode();
+        int index = hashCode & (table.length - 1);
+        for (Node e = table[index]; e != null; e = e.next) {
+            if (key.equals(e.key)){
+                e.idf = idf;
+                e.tfidf = e.tf * e.idf;
+            }
+        }
+    }
+
     public int getIdfCount(String key){ // Normally going to be for dictionary
         int hashCode = key.hashCode();
         int index = hashCode & (table.length - 1);
