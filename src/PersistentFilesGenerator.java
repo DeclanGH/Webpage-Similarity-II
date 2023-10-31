@@ -67,7 +67,7 @@ public class PersistentFilesGenerator {
             String[] arrayOfWords = scraper.webScrape(url);
 
             for(String s : arrayOfWords){
-                double idf = (double) arrayOfLinks.size() /dictionary.getIdfCount(s);
+                double idf = (double) arrayOfLinks.size() / dictionary.getIdfCount(s);
                 ht.advancedAdd(s,arrayOfWords.length,idf);
             }
 
