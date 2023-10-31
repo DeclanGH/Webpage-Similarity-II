@@ -16,6 +16,7 @@ import HashClasses.*;
 
 import javax.json.*;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Properties;
 
 public class PersistentFilesGenerator {
@@ -56,9 +57,11 @@ public class PersistentFilesGenerator {
 
         ExtendibleHashing urlMapToFile = new ExtendibleHashing();
         CustomHashTable dictionary = new CustomHashTable();
+        CustomHashTable myUrls = new CustomHashTable();
 
         for(int i=0; i<arrayOfLinks.size(); i++){ // populate dictionary
             String url = arrayOfLinks.getString(i);
+            myUrls.add(url); // populate myLinksAsArray
 
             for(String s : scraper.webScrape(url)){
                 dictionary.countForIdf(s,i+1);
@@ -91,6 +94,11 @@ public class PersistentFilesGenerator {
         FileOutputStream fos1 = new FileOutputStream("SerializedDictionary");
         ObjectOutputStream oos1 = new ObjectOutputStream(fos1);
         oos1.writeObject(dictionary);
+
+        // Serialize the myUrls Object to be used by other classes
+        FileOutputStream fos2 = new FileOutputStream("SerializedUrlList");
+        ObjectOutputStream oos2 = new ObjectOutputStream(fos2);
+        oos2.writeObject(myUrls);
 
     }
 }
