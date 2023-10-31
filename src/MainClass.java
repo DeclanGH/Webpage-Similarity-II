@@ -6,14 +6,21 @@
  */
 
 import javax.swing.*;
+import java.io.IOException;
 
 public class MainClass {
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(MainClass::runGui);
+        SwingUtilities.invokeLater(() -> {
+            try {
+                runGui();
+            } catch (IOException | ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
-    private static void runGui(){
+    private static void runGui() throws IOException, ClassNotFoundException {
         SimilarityAlgorithm gui = new SimilarityAlgorithm();
         JFrame frame = new JFrame();
         frame.setContentPane(gui.getPanel());
