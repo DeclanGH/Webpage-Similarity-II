@@ -16,7 +16,6 @@ import HashClasses.*;
 
 import javax.json.*;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Properties;
 
 public class PersistentFilesGenerator {
@@ -55,7 +54,7 @@ public class PersistentFilesGenerator {
     private static void createPersistentFiles(JsonArray arrayOfLinks) throws Exception {
         WebScraper scraper = new WebScraper();
 
-        ExtendibleHashing urlMapToFile = new ExtendibleHashing();
+        Directory urlMapToFile = new Directory(2,2);
         CustomHashTable dictionary = new CustomHashTable();
         CustomHashTable myUrls = new CustomHashTable();
 
