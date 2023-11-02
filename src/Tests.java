@@ -63,7 +63,7 @@ public class Tests {
         doc2.printAll();
         doc3.printAll();
 
-        Directory test = new Directory(2,2);
+        ExtendibleHashing test = new ExtendibleHashing();
 
         ByteArrayOutputStream bos1 = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(bos1);
@@ -84,7 +84,7 @@ public class Tests {
 
         FileInputStream fis = new FileInputStream("serializedExtensibleHT");
         ObjectInputStream inner = new ObjectInputStream(fis);
-        Directory test2 = (Directory) inner.readObject();
+        ExtendibleHashing test2 = (ExtendibleHashing) inner.readObject();
 
         ByteArrayInputStream bis2 = new ByteArrayInputStream(test2.find("doc2"));
         ObjectInputStream ois2 = new ObjectInputStream(bis2);
