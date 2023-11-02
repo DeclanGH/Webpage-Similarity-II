@@ -54,7 +54,7 @@ public class PersistentFilesGenerator {
     private static void createPersistentFiles(JsonArray arrayOfLinks) throws Exception {
         WebScraper scraper = new WebScraper();
 
-        Directory urlMapToFile = new Directory(2,2);
+        ExtendibleHashing urlMapToFile = new ExtendibleHashing();
         CustomHashTable dictionary = new CustomHashTable();
         CustomHashTable myUrls = new CustomHashTable();
 
