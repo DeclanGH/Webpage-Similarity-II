@@ -7,7 +7,7 @@
 
 import Generators.WebScraper;
 import HashClasses.CustomHashTable;
-import HashClasses.ExtendibleHashing;
+import HashClasses.Directory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -37,7 +37,7 @@ public class SimilarityAlgorithm {
         // Deserialize Extensible hashing class
         FileInputStream fis = new FileInputStream("SerializedExtensibleHashingClass");
         ObjectInputStream ois = new ObjectInputStream(fis);
-        ExtendibleHashing urlsMappedToObject = (ExtendibleHashing) ois.readObject();
+        Directory urlsMappedToObject = (Directory) ois.readObject();
 
         // Deserialize Dictionary
         FileInputStream fis1 = new FileInputStream("SerializedDictionary");
@@ -73,7 +73,7 @@ public class SimilarityAlgorithm {
     }
 
     private void findTwoMostSimilar
-            (String userInput, ExtendibleHashing urlsMappedToObject, CustomHashTable dictionary, String[] myUrls)
+            (String userInput, Directory urlsMappedToObject, CustomHashTable dictionary, String[] myUrls)
             throws IOException, ClassNotFoundException {
 
         WebScraper ws = new WebScraper();
