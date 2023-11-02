@@ -44,7 +44,7 @@ public class SimilarityAlgorithm {
         ObjectInputStream ois1 = new ObjectInputStream(fis1);
         CustomHashTable dictionary = (CustomHashTable) ois1.readObject();
 
-        // Deserialize Dictionary
+        // Deserialize myUrls list
         FileInputStream fis2 = new FileInputStream("SerializedUrlList");
         ObjectInputStream ois2 = new ObjectInputStream(fis2);
         CustomHashTable deserializedUrlList = (CustomHashTable) ois2.readObject();
