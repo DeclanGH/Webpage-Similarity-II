@@ -89,7 +89,7 @@ class Bucket implements Serializable {
                 return entry.getValue();
             }
         }
-        return null; // return -1 if not found, you can change this to any default value
+        return null;
     }
 
     public ArrayList<SimpleEntry<String, byte[]>> getMap() {
@@ -100,7 +100,6 @@ class Bucket implements Serializable {
         return 1 << localDepth;
     }
 
-    // getters and setters for localDepth
     public int getLocalDepth() {
         return localDepth;
     }
@@ -109,6 +108,3 @@ class Bucket implements Serializable {
         this.localDepth = localDepth;
     }
 }
-
-
-
