@@ -28,10 +28,16 @@ public class ClusteringAlgorithm {
         int k = rand.nextInt(5,11); // range of k
 
         HashSet<String> centroids = new HashSet<>();
+        int centroidSelector; // generates random points to get centroids
 
         while(centroids.size() != k){
-            centroids.add("yes");
+            centroidSelector = rand.nextInt(0,200);
+            centroids.add(myUrls[centroidSelector]);
         }
+
+
+
+
         System.out.print(k);
     }
 }
