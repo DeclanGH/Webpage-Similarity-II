@@ -135,7 +135,7 @@ public class SimilarityAlgorithm {
         outputLink2.setText(urlOfMax2);
     }
 
-    private static double doCosineSimilarity
+    public static double doCosineSimilarity
             (CustomHashTable userHt, CustomHashTable myHt, String[] myUrlWordList){
 
        // cosine similarity = A . B / (|A| * |B|), where A and B are vectors
