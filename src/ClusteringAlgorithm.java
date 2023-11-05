@@ -1,10 +1,16 @@
+/**
+ * Author: Declan ONUNKWO
+ * College: SUNY Oswego
+ * CSC 365 Project 2
+ * Fall 2023
+ */
+
 import HashClasses.CustomHashTable;
 import HashClasses.ExtendibleHashing;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import javax.json.*;
+import javax.json.stream.JsonGenerator;
+import java.io.*;
 import java.util.*;
 
 class Cluster {
@@ -53,9 +59,18 @@ class Cluster {
         return (variance * 100) <= 1;
     }
 
-    String getCentroid() {
-        return centroid;
+    JsonArray getClusterAsJsonArray() {
+        JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
+
+        jsonArrayBuilder.add(centroid);
+
+        for(Map.Entry<String, Double> entry : wikiLinks.entrySet()){
+            jsonArrayBuilder.add(entry.getKey());
+        }
+
+        return jsonArrayBuilder.build();
     }
+
 }
 
 public class ClusteringAlgorithm {
@@ -189,6 +204,41 @@ public class ClusteringAlgorithm {
     }
 
     private static void loadJsonOutput(HashMap<String,Cluster> finalState) {
+
+        // Create a new Json File (change path to match yours if you are borrowing this code)
+        String filePath = "/Users/declan/IdeaProjects/Wikipedia-Page-Similarity-II/src/";
+        File outputFile = new File(filePath + "Clusters.json");
+
+        OutputStream outputStream = null;
+        try{
+            outputStream = new FileOutputStream(outputFile);
+        }catch (FileNotFoundException e){
+            e.printStackTrace();
+        }
+        Json.createWriter(outputStream);
+        JsonWriter writer;
+
+        // create a configuration to allow pretty_printing (a nice and organized output file)
+        Map<String,Boolean> config = new HashMap<>();
+        config.put(JsonGenerator.PRETTY_PRINTING, true);
+        JsonWriterFactory wFactory = Json.createWriterFactory(config);
+
+        // Create Objects and Arrays
+        JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+        int counter = 1;
+
+        for (Map.Entry<String, Cluster> entry : finalState.entrySet()) {
+            JsonArray jsonArray = entry.getValue().getClusterAsJsonArray();
+            String cluster = "Cluster " + counter;
+            objectBuilder.add(cluster, jsonArray);
+            counter += 1;
+        }
+
+        // write object in our outputFile
+        writer = wFactory.createWriter(outputStream);
+        writer.writeObject(objectBuilder.build());
+        writer.close();
+        System.out.println("\nLinks Generated in a 'Clusters.json' file. Goodbye! :)");
     }
 
 }
