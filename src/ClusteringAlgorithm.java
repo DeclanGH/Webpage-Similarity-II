@@ -1,6 +1,7 @@
 import HashClasses.CustomHashTable;
 import HashClasses.ExtendibleHashing;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -15,8 +16,8 @@ class Cluster {
         this.wikiLinks = new HashMap<>();
     }
 
-    void clearCluster() {
-        wikiLinks.clear();
+    boolean isEmpty() {
+        return wikiLinks.isEmpty();
     }
 
     void addCluster(String wikiLink, double similarityScore) {
@@ -75,28 +76,119 @@ public class ClusteringAlgorithm {
         Random rand = new Random();
         int k = rand.nextInt(5,11); // range of k
 
-        HashSet<String> centroidSet = new HashSet<>();
+        int iterationLimit = 1000;
+
+        HashSet<String> centroidSet = new HashSet<>(); // the k selected centroids
+
         int centroidSelector; // generates random points to get centroids
 
-        while(centroidSet.size() != k){
-            centroidSelector = rand.nextInt(0,200);
-            centroidSet.add(myUrls[centroidSelector]);
-        }
 
-        HashMap<String,Cluster> centroidToCluster = new HashMap<>();
+        HashMap<String,Cluster> finalState = new HashMap<>();
 
-        for(String s : centroidSet){
-            centroidToCluster.put(s, new Cluster(s));
-        }
+        double variance = -1;
 
-        for(String s : myUrls){
-            if(!centroidSet.contains(s)){
-                for(){
+        for(int i=0; i<iterationLimit; i++){
 
+            HashMap<String,Cluster> initialState = new HashMap<>();
+
+            // select new centroids
+            while(centroidSet.size() != k){
+                centroidSelector = rand.nextInt(0,200);
+                centroidSet.add(myUrls[centroidSelector]);
+            }
+
+            // populate initial state/clustering
+            for(String s : centroidSet){
+                initialState.put(s, new Cluster(s));
+            }
+
+            // assign data-points(wiki documents) to their most similar centroid
+            for(String s : myUrls){
+                if(!centroidSet.contains(s)){
+                    ArrayList<String> centroidAndScore = getClosestCentroid(s,centroidSet,urlsMappedToObject);
+                    String closestCentroid = centroidAndScore.get(0);
+                    double similarityScore = Double.parseDouble(centroidAndScore.get(1));
+                    initialState.get(closestCentroid).addCluster(s,similarityScore);
                 }
+            }
+
+            // check if a centroid has nothing close to it. if true, abandon iteration.
+            boolean hasEmptyCentroid = false;
+            for(Map.Entry<String, Cluster> entry : initialState.entrySet()){
+                if(entry.getValue().isEmpty()){
+                    hasEmptyCentroid = true;
+                    break;
+                }
+            }
+
+            double varianceScore = 0;
+
+            if(hasEmptyCentroid){
+                continue;
+            } else{
+
+                for(String centroid : centroidSet){
+                    if(initialState.get(centroid).hasGoodVariance()){
+                        varianceScore += 1;
+                    }
+                }
+
+                varianceScore /= k;
+            }
+
+            if(varianceScore == 1){
+                finalState = initialState;
+                System.out.println("Perfect spread!");
+                break;
+            }else if (varianceScore > variance) {
+                variance = varianceScore;
+                finalState = initialState;
+            }
+
+            if (i == 999){
+                System.out.println("Reached Iteration Limit!");
             }
         }
 
-        System.out.print(k);
+        loadJsonOutput(finalState);
     }
+
+    private static ArrayList<String> getClosestCentroid
+            (String s, HashSet<String> centroidSet, ExtendibleHashing urlsMappedToObject)
+            throws IOException, ClassNotFoundException {
+
+        ArrayList<String> centroidAndScore = new ArrayList<>();
+
+        String closestCentroid = "";
+        double similarityScore1;
+        double similarityScore2 = -1; // initialize with a negative score
+
+        ByteArrayInputStream bis = new ByteArrayInputStream(urlsMappedToObject.find(s));
+        ObjectInputStream ois = new ObjectInputStream(bis);
+        CustomHashTable ht1 = (CustomHashTable) ois.readObject();
+        String[] ht1KeyList = ht1.toKeyList();
+
+        for(String centroid : centroidSet){
+            ByteArrayInputStream bis1 = new ByteArrayInputStream(urlsMappedToObject.find(centroid));
+            ObjectInputStream ois1 = new ObjectInputStream(bis1);
+            CustomHashTable ht2 = (CustomHashTable) ois1.readObject();
+
+            similarityScore1 = SimilarityAlgorithm.doCosineSimilarity(ht1,ht2,ht1KeyList);
+
+            if(similarityScore1 >= similarityScore2){
+                closestCentroid = centroid;
+                similarityScore2 = similarityScore1;
+            }
+        }
+
+        // Add centroid and score in that order
+        centroidAndScore.add(closestCentroid);
+        centroidAndScore.add(String.valueOf(similarityScore2));
+
+        return centroidAndScore;
+    }
+
+    private static void loadJsonOutput(HashMap<String,Cluster> finalState) {
+    }
+
 }
