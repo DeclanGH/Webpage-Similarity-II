@@ -31,6 +31,11 @@ class Cluster {
     }
 
     boolean hasGoodVariance(){
+
+        if(wikiLinks.isEmpty()){
+            return false;
+        }
+
         ArrayList<Double> listOfScores = new ArrayList<>();
 
         double mean = 0;
@@ -57,6 +62,33 @@ class Cluster {
         double variance = totalSum / (listOfScores.size() - 1);
 
         return (variance * 100) <= 1;
+    }
+
+    String getMeanCentroid(){
+
+        String meanCentroid = "";
+
+        double total = 0;
+
+        for(Map.Entry<String, Double> entry : wikiLinks.entrySet()){
+            total += entry.getValue();
+        }
+
+        double mean = total / wikiLinks.size();
+
+        double closestMean = 1000;
+
+        // find the url that has the closest similarity score to the mean similarity score
+        for(Map.Entry<String, Double> entry : wikiLinks.entrySet()){
+            double currClosestMean = Math.abs(mean - entry.getValue());
+
+            if(currClosestMean <= closestMean){
+                closestMean = currClosestMean;
+                meanCentroid = entry.getKey();
+            }
+        }
+
+        return meanCentroid;
     }
 
     JsonArray getClusterAsJsonArray() {
@@ -89,28 +121,51 @@ public class ClusteringAlgorithm {
         String[] myUrls = deserializedUrlList.toKeyList();
 
         Random rand = new Random();
-        int k = rand.nextInt(5,11); // range of k
+        /*int k = rand.nextInt(5,11); // range of k*/
+        int k = 10;
 
-        int iterationLimit = 1000;
+        int iterationLimit = 1000; // 100 times k (just my preference)
 
         HashSet<String> centroidSet = new HashSet<>(); // the k selected centroids
 
         int centroidSelector; // generates random points to get centroids
 
+        // populate with initial centroids
+        while(centroidSet.size() != k){
+            centroidSelector = rand.nextInt(0,200);
+            centroidSet.add(myUrls[centroidSelector]);
+        }
 
+        HashMap<String,Cluster> initialState = new HashMap<>();
         HashMap<String,Cluster> finalState = new HashMap<>();
 
         double variance = -1;
 
+        // loop until convergence (nice variance across all clusters) or iteration limit is met
         for(int i=0; i<iterationLimit; i++){
 
-            HashMap<String,Cluster> initialState = new HashMap<>();
+            // select new centroids using mean value (if it is not the first iteration)
+            if (i != 0){
+                HashSet<String> newCentroidSet = new HashSet<>();
 
-            // select new centroids
-            while(centroidSet.size() != k){
-                centroidSelector = rand.nextInt(0,200);
-                centroidSet.add(myUrls[centroidSelector]);
+                for(String oldCentroid : centroidSet){
+                    String newCentroid = initialState.get(oldCentroid).getMeanCentroid();
+                    newCentroidSet.add(newCentroid);
+                }
+
+                if(newCentroidSet.contains("")){ // in the case where we get empty clusters
+                    newCentroidSet.remove("");
+
+                    while(newCentroidSet.size() != k){
+                        centroidSelector = rand.nextInt(0,200);
+                        newCentroidSet.add(myUrls[centroidSelector]);
+                    }
+                }
+
+                centroidSet = newCentroidSet;
             }
+
+            initialState.clear();
 
             // populate initial state/clustering
             for(String s : centroidSet){
@@ -136,6 +191,7 @@ public class ClusteringAlgorithm {
                 }
             }
 
+            // If false, check for convergence (variance)
             double varianceScore = 0;
 
             if(hasEmptyCentroid){
@@ -153,9 +209,9 @@ public class ClusteringAlgorithm {
 
             if(varianceScore == 1){
                 finalState = initialState;
-                System.out.println("Perfect spread!");
+                System.out.println("Reached a Convergence!");
                 break;
-            }else if (varianceScore > variance) {
+            }else if (varianceScore >= variance) {
                 variance = varianceScore;
                 finalState = initialState;
             }
@@ -165,6 +221,7 @@ public class ClusteringAlgorithm {
             }
         }
 
+        System.out.println("\nwith a score of: " + variance);
         loadJsonOutput(finalState);
     }
 
