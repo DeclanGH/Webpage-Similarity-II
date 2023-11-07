@@ -209,7 +209,7 @@ public class ClusteringAlgorithm {
 
             if(varianceScore == 1){
                 finalState = initialState;
-                System.out.println("Reached a Convergence!");
+                System.out.println("Reached a Convergence!" + "\n at iteration " + i);
                 break;
             }else if (varianceScore >= variance) {
                 variance = varianceScore;
@@ -264,7 +264,7 @@ public class ClusteringAlgorithm {
 
         // Create a new Json File (change path to match yours if you are borrowing this code)
         String filePath = "/Users/declan/IdeaProjects/Wikipedia-Page-Similarity-II/src/";
-        File outputFile = new File(filePath + "Clusters.json");
+        File outputFile = new File(filePath + "10Clusters.json");
 
         OutputStream outputStream = null;
         try{
@@ -295,7 +295,7 @@ public class ClusteringAlgorithm {
         writer = wFactory.createWriter(outputStream);
         writer.writeObject(objectBuilder.build());
         writer.close();
-        System.out.println("\nLinks Generated in a 'Clusters.json' file. Goodbye! :)");
+        System.out.println("\nLinks Generated in a '10Clusters.json' file. Goodbye! :)");
     }
 
 }
