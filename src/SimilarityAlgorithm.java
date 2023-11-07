@@ -9,11 +9,14 @@ import Generators.WebScraper;
 import HashClasses.CustomHashTable;
 import HashClasses.ExtendibleHashing;
 
+import javax.json.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.*;
+import java.util.HashMap;
+import java.util.Properties;
 
 public class SimilarityAlgorithm {
     private JFormattedTextField userInput;
@@ -23,14 +26,15 @@ public class SimilarityAlgorithm {
     private JTextField outputLink1;
     private JTextField outputLink2;
     private JButton copyButton2;
-    private JTextPane textPane1;
-    private JTextPane textPane2;
 
     public JPanel getPanel() {
         return this.panel;
     }
 
     public SimilarityAlgorithm() throws IOException, ClassNotFoundException {
+
+        // Read clusters
+        HashMap<String, String> clusters = readClusters();
 
         // Deserialize before listeners
 
@@ -53,7 +57,7 @@ public class SimilarityAlgorithm {
         runButton.addActionListener(e -> {
             try {
                 String userInput = this.userInput.getText();
-                findTwoMostSimilar(userInput, urlsMappedToObject, dictionary, myUrls);
+                findTwoMostSimilar(userInput, urlsMappedToObject, dictionary, myUrls,clusters);
             } catch (IOException | ClassNotFoundException ex) {
                 throw new RuntimeException(ex);
             }
@@ -72,8 +76,51 @@ public class SimilarityAlgorithm {
         });
     }
 
+    private HashMap<String, String> readClusters() throws IOException {
+
+        // Instantiate map
+        HashMap<String,String> clusters = new HashMap<>();
+
+        // Properties
+        Properties properties = new Properties();
+        FileInputStream fis = null;
+        try{
+            fis = new FileInputStream("config.properties");
+        }catch (FileNotFoundException e){
+            System.out.println("change the filepath in `config.properties` to match yours.");
+        }
+        properties.load(fis);
+
+        // GET json file location (change the .json file name below to match yours)
+        String filePath = properties.getProperty("filepath") + File.separator + "10Clusters.json";
+        File inputFile = new File(filePath);
+
+        // READ json file
+        InputStream inputStream = null;
+        try{
+            inputStream = new FileInputStream(inputFile);
+        }catch (FileNotFoundException e){
+            e.printStackTrace();
+        }
+        JsonReader reader = Json.createReader(inputStream);
+        JsonObject jsonObject = reader.readObject();
+
+        inputStream.close();
+        reader.close();
+
+        for(int i=0; i<jsonObject.size(); i++){
+            JsonArray jsonArray = (JsonArray) jsonObject.get("Cluster " + (i+1));
+            for(int j=0; j<jsonArray.size(); j++){
+                clusters.put(jsonArray.getString(j),jsonArray.getString(0));
+            }
+        }
+
+        return clusters;
+    }
+
     private void findTwoMostSimilar
-            (String userInput, ExtendibleHashing urlsMappedToObject, CustomHashTable dictionary, String[] myUrls)
+            (String userInput, ExtendibleHashing urlsMappedToObject, CustomHashTable dictionary,
+             String[] myUrls, HashMap<String,String> clusters)
             throws IOException, ClassNotFoundException {
 
         WebScraper ws = new WebScraper();
@@ -94,9 +141,7 @@ public class SimilarityAlgorithm {
 
         // initialize with a random low score less than zero
         double maxSimilarity = -1000;
-        double maxSimilarity2 = -500;
         String urlOfMax = "";
-        String urlOfMax2 = "";
 
         for(int i=0; i<myUrls.length; i++){
             ByteArrayInputStream bis = new ByteArrayInputStream(urlsMappedToObject.find(myUrls[i]));
@@ -111,28 +156,14 @@ public class SimilarityAlgorithm {
 
             currSimilarityScore = doCosineSimilarity(userUrlHashTable, myUrlHashTable,myUrlWordList);
 
-            if(currSimilarityScore > maxSimilarity2){ // score must be greater than the smallest max to be considered
-                maxSimilarity2 = currSimilarityScore;
-                urlOfMax2 = myUrls[i];
-                if(maxSimilarity2 > maxSimilarity){ // swap if greater than our main max (maxSimilarity)
-                    double temp = maxSimilarity2;
-                    maxSimilarity2 = maxSimilarity;
-                    maxSimilarity = temp;
-                    String temp1 = urlOfMax2; // swap Strings too...
-                    urlOfMax2 = urlOfMax;
-                    urlOfMax = temp1;
-                }
+            if(currSimilarityScore > maxSimilarity){ // score must be greater than the smallest max to be considered
+                maxSimilarity = currSimilarityScore;
+                urlOfMax = myUrls[i];
             }
-
-
         }
 
-        // Convert to string and display
-        textPane1.setText((int)(maxSimilarity * 100)+"%");
-        textPane2.setText((int)(maxSimilarity2 * 100)+"%");
-
         outputLink1.setText(urlOfMax);
-        outputLink2.setText(urlOfMax2);
+        outputLink2.setText(clusters.get(urlOfMax));
     }
 
     public static double doCosineSimilarity
